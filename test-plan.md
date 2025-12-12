@@ -1,6 +1,6 @@
 # GetMeClass — Zoom App Test Plan (for Zoom Reviewers)
 
-**Important:** If you need permanent test accounts or credentials from us, request them via the contact link in our release notes and we will provide secure, temporary credentials.
+**Important:** If you need test accounts or credentials from us, request them via the contact link in our release notes and we will provide secure, temporary credentials.
 
 ---
 
