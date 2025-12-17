@@ -1,15 +1,41 @@
 # GetMeClass Documentation
 
+## Overview
+Get Me Class is a course management platform that integrates with Zoom to create online classes, track attendance, and manage recordings.
+> **Important Architecture Note**
+> Get Me Class uses **a single Zoom account owned and managed by Get Me Class.**
+> End users (tutors and students) **do not connect, authorise, or log in with Zoom** inside the application.
+
+---
+
+## Zoom Account & Authoriastion Model
+Get Me Class operates using a **server-managed Zoom integration model.**
+- All Zoom API calls are executed using **one Zoom account and administered by Get Me Class.**
+- Zoom OAuth authorisation is completed **once** by Get Me Class administrators.
+- Tutors and students **do not authorise Zoom,** connect accounts, or grant permissions.
+- There is **no "Connect Zoom or "Login with Zoom" page** in the UI by design.
+- Students join meetings using standard Zom join links and their own Zoom accounts.
+- OAuth tokens and Zoom identifiers are stored securely on the backend and are never exposed to end users.
+This design ensures:
+- Consistent meeting ownership
+- Reliable webhook delivery
+- Centralised recording access
+- Simplified user experience
+
+---
+
 ## 1. Adding the App
-
-Follow these steps to add **Get Me Class** to your Zoom account:
-
-1. Log in to your Zoom account.  
-2. Go to the **[Zoom App Marketplace](https://marketplace.zoom.us/)**.  
-3. Search for **“Get Me Class”** and click on the app.  
-4. Click **Add** or **Install**.  
-5. Follow the authorisation prompts to grant the required permissions.  
-6. If you encounter issues, visit our **[Support Page](https://getmeclass.com/#contact)**.
+Follow these steps to install **Get Me Class** from the Zoom App Marketplace.
+1. Log in to your Zoom account.
+2. Go to the **[Zoom App Marketplace](https://marketplace.zoom.us/)**.
+3. Search for **"Get Me Class"**.
+4. Select the app and click **Add** or **Install**.
+5. Review and approve the requested permissions.
+6. Once installed, Get Me Class is authorised to access Zoom APIs using its managed Zoom account.
+### Troubleshooting Installation Issues
+- Ensure your Zoom account allows Marketplace apps.
+- Confirm your account role permits app installation.
+- If installation fails, visit our **[Support Page](https://getmeclass.com/#contact)**.
 
 ---
 
@@ -18,104 +44,127 @@ Follow these steps to add **Get Me Class** to your Zoom account:
 ### Feature 1: Create a Zoom Meeting
 
 **Use Case:**  
-Automatically create a Zoom meeting for your course inside Get Me Class.
+Automatically create a Zoom meeting for a course managed in Get Me Class.
 
 **Prerequisites:**  
-- The Get Me Class app must be installed and authorised.  
-- Your Zoom account must allow meeting creation.  
-- You must be a tutor or tutor member inside Get Me Class.
+- Get Me Class app is installed and authorised.
+- You are a tutor or tutor member in Get Me Class.
+- The Get Me Class managed Zoom account has meeting creation permissions.
 
 **Steps:**  
-1. Open **Get Me Class**.  
-2. Click **Create Course** and select the **Zoom** course type.  
-3. Enter the course details (name, price, start date, end date, etc.).  
-4. After submitting, go to the **Zoom Courses** tab.  
-5. Find your course and toggle **สถานะห้อง Zoom** (Zoom Room Status).  
-6. When the dialog appears, click **สร้างห้อง Zoom** (Create Zoom Room).  
-7. The system will create the Zoom meeting and redirect you to the Zoom Meeting Details page.
+1. Log in to Get Me Class.
+2. Click **Create Course** and select **Zoom Course**.
+3. Enter course details (All required fields).
+4. Save the course.
+5. Open the **Zoom Courses** tab.
+6. Locate the course and toggle **สถานะห้อง Zoom (Zoom Room status).**
+7. Click **สร้างห้อง Zoom (Create Zoom Room).**
 
 **Result:**  
-A Zoom meeting is now linked to your course and ready for students.
-
+- A Zoom meeting is created using the Get Me Class managed Zoom account.
+- Meeting details are displayed inside Get Me Class.
+- Students can join from their Zoom course detail page.
+  
 ---
 
 ### Feature 2: View Participants (Attendance Tracking)
 
 **Use Case:**  
-Automatically track student attendance after each Zoom session.
+Automatically record student attendance after each Zoom session.
 
 **Prerequisites:**  
-- A Zoom meeting must already be created.  
-- Students must join the meeting using a valid Zoom account.
+- A Zoom meeting has been created for the course.
+- Students join the meeting using a valid Zoom account.
 
 **Steps:**  
-1. After the Zoom meeting ends, a webhook automatically checks and records attendance for all participants.
+1. Students join the Zoom meeting via the course link.
+2. When the meeting ends, Zoom webhook events are delivered to Get Me Class.
+3. Get Me Class processes participant join/leave events.
 
 **Result:**  
-Tutors and students no longer need to mark attendance manually.
+- Attendance is recorded automatically.
+- Tutors and students do not need to mark attendance manually.
+
+**Note**
+Attendance tracking uses Zoom webhook events. Students are **not required to authorise Zoom** with Get Me Class.
 
 ---
 
-### Feature 3: Download Zoom Recordings
+### Feature 3: Zoom Recording Management
 
 **Use Case:**  
-Automatically download Zoom cloud recordings after the meeting ends.
+Automatically retrieve Zoom cloud recordings for completed sessions.
 
 **Prerequisites:**  
-- A Zoom meeting must already be created.  
-- The tutor must have sufficient storage available in their Get Me Class account.
+- Cloud recording is enabled on the Get Me Class managed Zoom account.
+- The tutor has sufficient storage in Get Me Class.
 
 **Steps:**  
-1. After the Zoom meeting ends, a webhook updates the recording status in the database.  
-2. Recordings are automatically downloaded to the tutor’s Get Me Class storage every weekend.
+1. After a meeting ends, Zoo sends recording-related webhook events.
+2. Get Me Class updates the recording status in system.
+3. Recordings are automatically downloaded to the tutor's storage on a scheduled basis (every weekend).
 
 **Result:**  
-Tutors do not need to manually download Zoom recording files.
+- Tutors do not need to manually download recordings from Zoom.
+- Recordings are stored and accessible within Get Me Class.
 
 ---
 
 ## 3. Removing the App
 
-To remove (deauthorise) **Get Me Class** from your Zoom account:
+To remove (deauthorise) **Get Me Class** from your Zoom:
 
-1. Log in to Zoom.  
+1. Log in to Zoom account.  
 2. Go to **App Marketplace → Manage → Installed Apps**.  
 3. Search for **Get Me Class**.  
 4. Click **Remove**.  
-5. Confirm the deauthorisation.
+5. Confirm removal.
 
 ### What Happens After Deauthorisation
 
-- You will no longer be able to create or manage Zoom meetings through Get Me Class.  
-- Linked Zoom meetings will **not** be deleted from your Zoom account.  
-- Zoom-related features such as attendance syncing and recording downloads will stop working.  
-- All stored OAuth tokens and Zoom-related identifiers will be permanently deleted from our system.
+- Get Me Class can no longer create or manage Zoom meetings.
+- Attendance tracking and recording downloads stop immediately.
+- Existing Zoom meetings are not deleted from Zoom.
+- All stored OAuth tokens and Zoom-related identifiers are permanently deleted from Get Me Class systems.
+- Get Me Class data unrelated to Zoom remains intact.
 
 ---
 
 ## 4. Troubleshooting Guide
 
 ### Installation Issues
-- Ensure that your Zoom admin allows Marketplace apps.  
-- Verify that your Zoom account type supports app installation.
+- Ensure Marketplace apps are enabled by your Zoom admin.
+- Verify your Zoom account type supports app installation.
 
-### Meeting Creation Errors
-- Confirm that your Zoom account has permission to create meetings.  
-- Check whether you have reached Zoom’s meeting creation limits.
+### Meeting Creation Issues
+- Confirm the Get Me Class managed Zoom account has not reached meeting limits.
+- Verify Zoom service availability.
 
-### Redirect or Authorization Issues
-- Disable popup blockers in your browser.  
-- Try using an incognito/private window.  
-- Try another browser.
+### Recording Issues
+- Ensure cloud recording is enabled on the Zoom account.
+- Allow time for Zoom to finalise recording processing.
 
-Still need help? Contact us: **[Get Me Class Support](https://getmeclass.com/#contact)**
+If problems persist, contact support: **[Get Me Class Support](https://getmeclass.com/#contact)**
 
 ---
 
 ## 5. Privacy & Data Usage
 
-- We store only the Zoom OAuth tokens, meeting IDs, and participant IDs required to perform app functions.  
-- We do **not** store your Zoom password.  
-- All tokens are encrypted and deleted immediately when you remove the app.  
-- We do **not** access or store Zoom chat logs.  
-- Full privacy policy is available on our website.
+- Get Me Class stores only the data required for Zoom integration:
+  - OAuth tokens
+  - Zoom meeting IDs
+  - Participant identifiers
+- Zoom passwords are **never stored**.
+- All tokens are encrypted at rest.
+- Zoom tokens and identifiers are deleted immediately upon app removal.
+- Zoom chat logs are not accessed or stored.
+Full privacy policy is available on our website.
+
+---
+
+## Future Changes
+If GetMeClass introduces:
+- User-authorized Zoom connections
+- Login with Zoom
+- Multiple Zoom account support
+We will submit a new app version for Zoom review with updated scopes, documentation, and test plans.
