@@ -1,14 +1,177 @@
 # GetMeClass — Zoom App Test Plan (for Zoom Reviewers)
 
-**Important:** If you need test accounts or credentials from us, request them via the contact link in our release notes and we will provide secure, temporary credentials.
+## 1. Purpose of this Test Plan
+This document provides Zoom reviewers with a **step-by-step** to verify the Get Me Class Zoom integration.
+It covers: 
+- App authorisation model
+- OAuth scopes usage
+- Meeting creation
+- Student participation
+- Attendance tracking via webhooks
+- Cloud recording handling
+- Deauthorisation behaviour
+>  **Important**  
+> Get Me Class uses a **single Zoom account owned and managed by Get Me Class.**  
+> End users **do not authorise Zoom** and there is **no Zoom integration UI** for tutors or students.
 
 ---
 
-## Summary / Purpose
+## 2. Test Environment Requirements
+**Required Accounts**
+- **Zoom account** used by Get Me Class (already configred by our team)
+- **Get Me Class Tutor account**
+- **Get Me Class Student account**
 
-This test plan walks Zoom reviewers through every step needed to verify the GetMeClass Zoom integration. It covers app OAuth authorization, each OAuth scope requested, and all user-facing functionality: creating/reading/updating/deleting meetings, attendance capture, and automatic recording downloads.
+**Environment**
+- OAuth authorisation uses the **Production Client ID**
+- Webhook endpoint is publicly accessible
+- Cloud recording enabled on the Get Me Class Zoom account
+  
+---
+
+## 3. OAuth & Authorisation Model
+- OAuth authorisation is performed **once** by Get Me Class adminitrators.
+- OAuth tokens are stored securely on the backend.
+- Tutors and students:
+  - Do **not** connect Zoom
+  - Do **not** authorise OAuth
+  - Do **not** log in with Zoom
+- Zoom API calls are triggerd only by backend services.
+This app follows a **server-managed Zoom integration model.**
 
 ---
+
+## 4. OAuth Scopes & Feature Mapping
+
+| Zoom Scope | Used for |
+|-----|------|
+| `/meeting:write` | Create Zoom meetings |
+| `/meeting:read`  | Retrieve meeting details |
+| `/recording:read` | Retrieve recording metadata |
+| Webhooks | Attendance & recording events |
+
+---
+
+## 5. End-to-End Test Scenarios
+
+### Scenario 1 : Create a Zoom Meeting
+**Scopes Used: `/meeting:write`**
+**Steps**
+1. Log in to Get Me Class as a **Tutor**.
+2. Navigate to Create Course (if not already created).
+3. Select **Zoom Course**.
+4. Enter course details.
+5. Save the course.
+6. Go to **Zoom Courses**.
+7. Toggle **สถานะห้อง Zoom (Zoom Room Status)**.
+8. Click **สร้างห้อง Zoom (Create Zoom Room)**.
+**Expected Result**
+- Backend calls `POST /users/me/meetings`
+- Zoom meeting is created under the Get Me Class Zoom account
+- Meeting details appear in Get Me Class UI
+
+---
+
+### Scenario 2: Student Joins Zoom Meeting 
+**Scopes UseD: `/meeting:read`**
+**Steps**
+1. Log in as **Student** in Get Me Class
+2. Open the Zoom Course.
+3. Click **Go to Class**
+4. Join the Zoom meeting using any valid Zoom account.
+**Expected Result**
+- Student joins successfully
+- Zoom participant list shows the student
+- No Zoom authorisation prompt appears
+
+---
+
+### Scenario 3: Attendance Tracking via Webhooks
+**Mechanism:** Zoom Webhooks (`meeting.ended`, `participant.joined`, `participant.left`)
+**Steps**
+1. End the Zoom meeting.
+2. Zoom sends webhook events to Get Me Class.
+3. Backend processes participant data.
+**Expected Result**
+- Attendance record is created automatically
+- Tutor can review attendance in Get Me Class
+- No Manual attendance action required
+
+---
+
+### Scenario 4: Recording Processing & Download
+**Scopes Used:** `/recording:read`
+**Steps**
+1. Ensure cloud recording is enabled.
+2. End the meeting.
+3. Zoom sends recording.completed webhook.
+4. Backend retrieves recording metadata.
+5. Recording is downloaded to Get Me Class storage on schedule.
+**Expected Result**
+- Recording status updated in database
+- Recording file available to tutor
+- Tutor does not need to access Zoom manually
+
+---
+
+## 6. Negative/Edge Case Testing
+**Deauthorisaton**
+1. Remove Get Me Class app from Zoom Marketplace.
+2. Attempt to create a new Zoom meeting in Get Me Class.
+**Expected**
+- API calls fail gracefully
+- User sees a clear error message
+- No Zoom data is accessed
+
+---
+
+**Invalid Token**
+- OAuth token revoked or expired
+**Expected**
+- Backend receives 401/403
+- Error logged
+- Zoom features disabled until reauthorisation
+
+---
+
+## 7. Deauthorisation & Data Handling
+When the app is removed from Zoom:
+- OAuth tokens are immediately deleted
+- Zoom meeting IDs and identifiers are removed
+- Zoom features stop functioning
+- Existing Zoom meetings remain in Zoom
+- Non-Zoom GetMeClass data remains unaffected
+
+---
+
+##  8. Logs & Evidence Available
+We can provide:
+- API call logs (redacted)
+- Webhook delivery logs
+- Screen recording demonstrating:
+  - Course creation
+  - Meeting creation
+  - Student join
+  - Attendance update
+  - Recording availability
+
+---
+
+## 9. Reviewer Notes
+- This app does not support user-managed Zoom connections.
+- There is **no Zoom login or authorisation UI.**
+- All Zoom functionality is handled by backend services.
+- Student joining meetings with their own Zoom accounts does **not** imply OAuth authorisation
+
+---
+
+
+
+
+
+
+
+
 
 ## Required test environment
 
